@@ -776,6 +776,32 @@
         }
         
         // --- EDITING & HISTORY ---
+        function compareHierarchies(oldData, newData) {
+            const oldEntities = new Map(oldData.map(item => [JSON.stringify({ name: item.entityName, level: item.level, location: item.location }), item]));
+            const newEntities = new Map(newData.map(item => [JSON.stringify({ name: item.entityName, level: item.level, location: item.location }), item]));
+            
+            const added = [];
+            const removed = [];
+            const unchanged = [];
+
+            newData.forEach(item => {
+                const key = JSON.stringify({ name: item.entityName, level: item.level, location: item.location });
+                if (!oldEntities.has(key)) {
+                    added.push({ ...item, changeType: 'added' });
+                } else {
+                    unchanged.push({ ...item });
+                }
+            });
+
+            oldData.forEach(item => {
+                const key = JSON.stringify({ name: item.entityName, level: item.level, location: item.location });
+                if (!newEntities.has(key)) {
+                    removed.push({ ...item, changeType: 'removed' });
+                }
+            });
+
+            return [...unchanged, ...added, ...removed];
+        }
         function handleInlineEdit(index, field, value) {
             if (!hierarchyData[index] || hierarchyData[index][field] === value) return;
             
